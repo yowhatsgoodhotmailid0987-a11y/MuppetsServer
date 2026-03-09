@@ -28,5 +28,8 @@ async def main():
     await asyncio.gather(server.serve(), MuppetsServer.start())
 
 
+# Export app for Railway
+app = auth_app
+
 if __name__ == "__main__":
     asyncio.run(main())
