@@ -7,31 +7,32 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# localmodules:start
 from config import HTTP_PORT
 from database import init_database
 from MuppetsServer import MuppetsServer
 from MuppetsServer.auth_app import app as auth_app
 from MuppetsServer.routers.php_compat import router as php_router
-   app.include_router(php_router)
-
-# localmodules:end
 
 logging.basicConfig(
     level=logging.DEBUG if environ.get("type", "release") == "debug" else logging.INFO,
     format="%(levelname)s/%(name)s:\t%(message)s",
 )
 
-
-async def main():
-    await init_database()
-    config = uvicorn.Config(auth_app, host="0.0.0.0", port=int(HTTP_PORT))
-    server = uvicorn.Server(config)
-    await asyncio.gather(server.serve(), MuppetsServer.start())
-
-
-# Export app for Railway
 app = auth_app
+app.include_router(php_router)
+
+@app.on_event("startup")
+async def startup_event():
+    await init_database()
+    try:
+        asyncio.create_task(MuppetsServer.start())
+    except:
+        pass
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    uvicorn.run(
+        app,
+        host="0.0.0.0",
+        port=int(HTTP_PORT),
+        log_level="info"
+    )
