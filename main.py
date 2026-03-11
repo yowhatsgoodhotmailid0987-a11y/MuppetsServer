@@ -12,6 +12,8 @@ from config import HTTP_PORT
 from database import init_database
 from MuppetsServer import MuppetsServer
 from MuppetsServer.auth_app import app as auth_app
+from MuppetsServer.routers.php_compat import router as php_router
+   app.include_router(php_router)
 
 # localmodules:end
 
